@@ -81,8 +81,8 @@ contract MyContract {
         token1 = _token1;
     }
 
-    function update(uint balance0, uint balance1, uint112 _reserve0, uint112 _reserve1) public {
-        uint32 blockTimestamp = uint32(block.timestamp % 2**32);
+    function _update(uint balance0, uint balance1, uint112 _reserve0, uint112 _reserve1) private {
+        uint32 blockTimestamp = uint32(block.timestamp);
         uint32 timeElapsed = blockTimestamp - blockTimestampLast; // overflow is desired
         if (timeElapsed > 0 && _reserve0 != 0 && _reserve1 != 0) {
             // * never overflows, and + overflow is desired
