@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+//https://github.com/SungJunEun/v2-core/blob/master/contracts/UniswapV2Pair.sol
 pragma solidity =0.8.0;
 
 import "https://github.com/SungJunEun/Solidity_Practice/blob/main/UniswapV2/UniswapV2ERC20_0.8.0.sol";
