@@ -5,8 +5,14 @@ import "https://github.com/SungJunEun/Solidity_Practice/blob/main/UniswapV2/Unis
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/ERC20.sol";
 import "https://github.com/SungJunEun/Solidity_Practice/blob/main/UniswapV2/libraries/UQ112x112.sol";
 
-contract TOKEN is ERC20 {
+contract MOYED is ERC20 {
     constructor() ERC20("MOYED", "MYD") {
+        _mint(_msgSender(), 1000*10**18);
+    }
+}
+
+contract GOLDEN is ERC20 {
+    constructor() ERC20("GOLDEN", "GLD") {
         _mint(_msgSender(), 1000*10**18);
     }
 }
@@ -43,6 +49,13 @@ contract MyContract {
         _blockTimestampLast = blockTimestampLast;
     }
 
+    function _safeTransfer(address token, address to, uint value) private  {
+        
+        // Equivalent to ERC20(token).transfer(to,value);
+        (bool success, bytes memory data) = token.call(abi.encodeWithSelector(SELECTOR, to, value));
+        require(success && (data.length == 0 || abi.decode(data, (bool))), 'UniswapV2: TRANSFER_FAILED');
+    }
+
     event Mint(address indexed sender, uint amount0, uint amount1);
     event Burn(address indexed sender, uint amount0, uint amount1, address indexed to);
     event Swap(
@@ -67,10 +80,18 @@ contract MyContract {
         token1 = _token1;
     }
 
-    function _safeTransfer(address token, address to, uint value) private  {
-        
-        // Equivalent to ERC20(token).transfer(to,value);
-        (bool success, bytes memory data) = token.call(abi.encodeWithSelector(SELECTOR, to, value));
-        require(success && (data.length == 0 || abi.decode(data, (bool))), 'UniswapV2: TRANSFER_FAILED');
+    function update(uint balance0, uint balance1, uint112 _reserve0, uint112 _reserve1) public {
+        uint32 blockTimestamp = uint32(block.timestamp % 2**32);
+        uint32 timeElapsed = blockTimestamp - blockTimestampLast; // overflow is desired
+        if (timeElapsed > 0 && _reserve0 != 0 && _reserve1 != 0) {
+            // * never overflows, and + overflow is desired
+            price0CumulativeLast += uint(UQ112x112.encode(_reserve1).uqdiv(_reserve0)) * timeElapsed;
+            price1CumulativeLast += uint(UQ112x112.encode(_reserve0).uqdiv(_reserve1)) * timeElapsed;
+        }
+        reserve0 = uint112(balance0);
+        reserve1 = uint112(balance1);
+        blockTimestampLast = blockTimestamp;
+        emit Sync(reserve0, reserve1);
     }
+ 
 }
